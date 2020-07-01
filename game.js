@@ -64,7 +64,25 @@ function create() {
     frames: [{ key: 'dude', frame: 8 }],
     frameRate: 20
   });
-  this.physics.add.collider(player, platforms);
+
+  var score = 0;
+  var scoreText = this.add
+    .text(16, 16, 'Score: 0', {
+      fontSize: '32px',
+      fill: '#fff'
+    })
+    .setScrollFactor(0);
+
+  this.physics.add.collider(player, platforms, updateScore);
+
+  function updateScore(player, platform) {
+    if (!platform.touched && player.body.touching.down) {
+      score += 10;
+      scoreText.setText('Score: ' + score);
+      platform.touched = true;
+    }
+  }
+
   cursors = this.input.keyboard.createCursorKeys();
 
   camera = this.cameras.main;
@@ -111,6 +129,7 @@ function update() {
     if (platform.y >= scrollY + 700) {
       platform.y = scrollY + Phaser.Math.Between(-10, 10);
       platform.x = Phaser.Math.Between(100, 600);
+      platform.touched = false;
       platform.body.updateFromGameObject();
     }
   });
@@ -128,6 +147,18 @@ function update() {
     player.setTint(0xff0000);
     player.anims.play('turn');
     gameOver = true;
+    var game = this.scene;
+    this.add
+      .text(300, camera.scrollY + 400, 'New Game?', {
+        fontSize: '32px',
+        fill: '#00ff15',
+        backgroundColor: 'black'
+      })
+      .setPadding(10, 10)
+      .setInteractive()
+      .on('pointerup', function () {
+        game.restart();
+      });
   }
 
   if (camera.scrollY < -2000) {
